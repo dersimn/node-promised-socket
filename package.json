@@ -1,0 +1,23 @@
+{
+  "name": "promised-socket",
+  "version": "1.0.0",
+  "main": "index.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dersimn/node-promised-socket.git"
+  },
+  "author": "Simon Christmann <simon@christmann.email>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dersimn/node-promised-socket/issues"
+  },
+  "homepage": "https://github.com/dersimn/node-promised-socket#readme",
+  "description": "Extends net.Socket with Promises",
+  "dependencies": {
+    "p-event": "^4.1.0"
+  }
+}
