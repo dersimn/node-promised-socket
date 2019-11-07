@@ -1,4 +1,4 @@
-const PromisedSocket = require('./index.js');
+const PromisedSocket = require('..');
 const socket = new PromisedSocket();
 socket.setEncoding('ascii');
 socket.setTimeout(3000);
