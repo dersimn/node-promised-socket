@@ -9,7 +9,7 @@ class PromisedSocket extends net.Socket {
         this.on('connect', () => {
             this._connected = true;
         });
-        this.on('error', err => {
+        this.on('error', () => {
             this._connected = false;
         });
         this.on('close', () => {
@@ -49,26 +49,39 @@ class PromisedSocket extends net.Socket {
         });
     }
 
-    writeReadUntil(writeMessage, finishRegex) {
+    writeRead(writeMessage, options) {
+        if (options instanceof RegExp) {
+            options = {
+                finishRegexp: options,
+                limit: Infinity
+            };
+        } else {
+            options = options || {
+                limit: 1
+            };
+        }
+
         return new Promise(async (resolve, reject) => {
-            pEvent(this, 'error').then(err => {
-                reject(this._encapsulateError(err));
+            pEvent(this, 'error').then(error => {
+                reject(this._encapsulateError(error));
             }).catch(error => {
-                reject(new Error('Unkown error.'));
+                reject(this._encapsulateError(error));
             });
 
             pEvent(this, 'timeout').then(() => {
                 reject(new Error('Socket timed out.'));
             }).catch(error => {
-                reject(new Error('Unkown error.'));
+                reject(this._encapsulateError(error));
             });
 
             this.write(writeMessage);
             let message = '';
-            const asyncIterator = pEvent.iterator(this, 'data');
+            const asyncIterator = pEvent.iterator(this, 'data', {
+                limit: options.limit
+            });
             for await (const event of asyncIterator) {
                 message += event;
-                if (finishRegex.test(event)) {
+                if (options.finishRegexp instanceof RegExp && options.finishRegexp.test(event)) {
                     break;
                 }
             }
