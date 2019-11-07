@@ -23,7 +23,15 @@ class PromisedSocket extends net.Socket {
         return this._connected;
     }
 
-    async connect(...args) {
+    _encapsulateError(err) {
+        if (err instanceof Error) {
+            return err;
+        } else {
+            return new Error(err);
+        }
+    }
+
+    connect(...args) {
         return new Promise((resolve, reject) => {
             pEvent(this, 'connect').then(() => {
                 resolve();
