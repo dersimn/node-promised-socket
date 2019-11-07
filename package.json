@@ -2,7 +2,9 @@
   "name": "promised-socket",
   "version": "1.0.0",
   "main": "index.js",
-  "devDependencies": {},
+  "devDependencies": {
+    "xo": "^0.25.3"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -19,5 +21,11 @@
   "description": "Extends net.Socket with Promises",
   "dependencies": {
     "p-event": "^4.1.0"
+  },
+  "xo": {
+    "space": 4,
+    "ignore": [
+      "examples/*"
+    ]
   }
 }
