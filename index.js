@@ -26,23 +26,23 @@ class PromisedSocket extends net.Socket {
     _encapsulateError(err) {
         if (err instanceof Error) {
             return err;
-        } else {
-            return new Error(err);
         }
+
+        return new Error(err);
     }
 
     connect(...args) {
         return new Promise((resolve, reject) => {
             pEvent(this, 'connect').then(() => {
                 resolve();
-            }).catch((err) => {
-                reject(this._encapsulateError(err));
+            }).catch(error => {
+                reject(this._encapsulateError(error));
             });
 
             pEvent(this, 'timeout').then(() => {
                 reject(new Error('Timeout while trying to conenct.'));
-            }).catch((err) => {
-                reject(this._encapsulateError(err));
+            }).catch(error => {
+                reject(this._encapsulateError(error));
             });
 
             super.connect(...args);
@@ -53,13 +53,13 @@ class PromisedSocket extends net.Socket {
         return new Promise(async (resolve, reject) => {
             pEvent(this, 'error').then(err => {
                 reject(this._encapsulateError(err));
-            }).catch(err => {
+            }).catch(error => {
                 reject(new Error('Unkown error.'));
             });
 
             pEvent(this, 'timeout').then(() => {
                 reject(new Error('Socket timed out.'));
-            }).catch(err => {
+            }).catch(error => {
                 reject(new Error('Unkown error.'));
             });
 
@@ -68,8 +68,11 @@ class PromisedSocket extends net.Socket {
             const asyncIterator = pEvent.iterator(this, 'data');
             for await (const event of asyncIterator) {
                 message += event;
-                if (finishRegex.test(event)) break;
+                if (finishRegex.test(event)) {
+                    break;
+                }
             }
+
             resolve(message);
         });
     }
