@@ -50,18 +50,24 @@ class PromisedSocket extends net.Socket {
     }
 
     writeRead(writeMessage, options) {
-        if (options instanceof RegExp) {
-            options = {
-                finishRegexp: options,
-                limit: Infinity
-            };
-        } else {
-            options = options || {
-                limit: 1
-            };
-        }
-
         return new Promise(async (resolve, reject) => {
+            // Process given options
+            if (options instanceof RegExp) {
+                options = {
+                    breakCond: options
+                };
+            } else {
+                options = options || {
+                    limit: 1
+                };
+            }
+
+            // Sanity check
+            if (!('breakCond' in options) && !('limit' in options)) {
+                reject(new Error('Either breakCond or limit must be specified.'));
+            }
+
+            // Set up rejection event Promises
             pEvent(this, 'error').then(error => {
                 reject(this._encapsulateError(error));
             }).catch(error => {
@@ -74,14 +80,13 @@ class PromisedSocket extends net.Socket {
                 reject(this._encapsulateError(error));
             });
 
-            this.write(writeMessage);
+            // Send out request and try to collect answer
+            this.write(writeMessage, options.encoding);
+            const asyncIterator = pEvent.iterator(this, 'data', options);
             let message = '';
-            const asyncIterator = pEvent.iterator(this, 'data', {
-                limit: options.limit
-            });
             for await (const event of asyncIterator) {
                 message += event;
-                if (options.finishRegexp instanceof RegExp && options.finishRegexp.test(event)) {
+                if (options.breakCond instanceof RegExp && options.breakCond.test(event)) {
                     break;
                 }
             }
